@@ -1,3 +1,7 @@
+---
+title: "FAQ"
+---
+
 # Remote Control App FAQ
 
 ## Basic Requirements
