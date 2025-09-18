@@ -29,4 +29,4 @@ By using our App, you agree to the following terms:
 ---
 
 If you have any questions, please contact us at:  
-**support@dcremotecontrol].com**
+**support@dcremotecontrol.com**
