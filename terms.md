@@ -1,3 +1,7 @@
+---
+title: "Terms"
+---
+
 # Terms of Service
 
 _Last updated: September 18, 2025_
