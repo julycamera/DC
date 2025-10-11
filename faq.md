@@ -50,4 +50,4 @@ If the issue persists, try using a different remote control app to determine if 
 
 If you've tried all the above steps and still encounter issues, please contact our support team:
 
-- **Email:** support@dcremotecontrol.com
+- **Email:** unitvremote@outlook.com
