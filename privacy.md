@@ -34,4 +34,4 @@ Your privacy is important to us. This Privacy Policy explains how **[DC Remote C
 ---
 
 If you have any questions, please contact us at:  
-**support@dcremotecontrol.com**
+**unitvremote@outlook.com**
