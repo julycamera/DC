@@ -47,7 +47,13 @@
     form input,form textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--text)}
     @media(max-width:980px){.hero{grid-template-columns:1fr}.features,.devices,.shots,.pricing,.faq{grid-template-columns:1fr 1fr}.phone{margin:0 auto}}
     @media(max-width:640px){.features,.devices,.shots,.pricing,.faq{grid-template-columns:1fr}}
-  </style>
+  
+/* Segmented control for UI Preview */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+.seg button{padding:8px 14px;border:0;background:transparent;color:var(--muted);cursor:pointer;font-weight:600}
+.seg button[aria-selected="true"]{background:linear-gradient(90deg,var(--primary),var(--primary-2));color:#fff}
+
+</style>
 </head>
 <body>
 
@@ -156,7 +162,8 @@
   <section id="demo" class="section">
     <div class="container">
       <h2 class="title" style="font-size:28px;margin-bottom:16px">UI Preview</h2>
-      <div class="grid shots">
+      <div class="seg" id="deviceSeg" role="tablist" aria-label="Device selector" style="margin:8px 0 12px"><button class="seg-btn" data-mode="iphone" role="tab" aria-selected="true">iPhone</button><button class="seg-btn" data-mode="ipad" role="tab" aria-selected="false">iPad</button></div>
+<div class="grid shots">
         <div class="shot"><img src="./image1.png" alt="App Screenshot 1" onerror="this.replaceWith(document.createElement('span')).textContent='Missing image1.png'"></div>
         <div class="shot"><img src="./image2.png" alt="App Screenshot 2" onerror="this.replaceWith(document.createElement('span')).textContent='Missing image2.png'"></div>
         <div class="shot"><img src="./image3.png" alt="App Screenshot 3" onerror="this.replaceWith(document.createElement('span')).textContent='Missing image3.png'"></div>
@@ -309,5 +316,98 @@
       })();
     })();
   </script>
+
+<script>
+(function(){
+  function setMode(mode){
+    var imgs = document.querySelectorAll('.grid.shots .shot img');
+    // Only operate on the first 4 images: map to 1..4 strictly
+    for(var i=0;i<4 && i<imgs.length;i++){
+      var n = i + 1; // 1..4 (never 0)
+      var next = (mode==='ipad' ? './ipad_image' : './image') + n + '.png';
+      imgs[i].setAttribute('src', next);
+    }
+    // update selected state
+    var btns = document.querySelectorAll('#deviceSeg .seg-btn');
+    for(var j=0;j<btns.length;j++){
+      var sel = (btns[j].getAttribute('data-mode')===mode);
+      btns[j].setAttribute('aria-selected', sel ? 'true' : 'false');
+    }
+    try{ localStorage.setItem('ui_preview_mode', mode); }catch(e){}
+  }
+  function init(){
+    // default to iPhone (image1..4)
+    try{
+      var saved = localStorage.getItem('ui_preview_mode');
+      setMode(saved || 'iphone');
+    }catch(e){
+      setMode('iphone');
+    }
+    var seg = document.getElementById('deviceSeg');
+    if(seg){
+      seg.addEventListener('click', function(e){
+        var b = e.target.closest && e.target.closest('button[data-mode]');
+        if(!b) return;
+        setMode(b.getAttribute('data-mode'));
+      });
+    }
+    // Also support direct clicks on the two buttons in case event delegation fails
+    var btnI = document.querySelector('#deviceSeg .seg-btn[data-mode="iphone"]');
+    var btnP = document.querySelector('#deviceSeg .seg-btn[data-mode="ipad"]');
+    if(btnI){ btnI.onclick = function(){ setMode('iphone'); }; }
+    if(btnP){ btnP.onclick = function(){ setMode('ipad'); }; }
+    // Expose globally if needed
+    window.__setUIPreviewMode = setMode;
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
+
+
+<script>
+(function(){
+  function safeSwap(mode){
+    var imgs = document.querySelectorAll('.grid.shots .shot img');
+    for(var i=0;i<4 && i<imgs.length;i++){
+      (function(img, n){
+        // Neutralize any destructive inline onerror that might replace the node
+        try{ img.onerror = null; img.removeAttribute && img.removeAttribute('onerror'); }catch(e){}
+        var target = (mode==='ipad' ? './ipad_image' : './image') + n + '.png';
+        var current = img.getAttribute('src');
+        // Preload: only commit if the target can load, otherwise keep current src
+        var loader = new Image();
+        loader.onload = function(){ img.setAttribute('src', target); };
+        loader.onerror = function(){ /* keep current */ };
+        loader.src = target;
+      })(imgs[i], i+1);
+    }
+    // update selected state
+    var btns = document.querySelectorAll('#deviceSeg .seg-btn');
+    for(var j=0;j<btns.length;j++){
+      var sel = (btns[j].getAttribute('data-mode')===mode);
+      btns[j].setAttribute('aria-selected', sel ? 'true' : 'false');
+    }
+    try{ localStorage.setItem('ui_preview_mode', mode); }catch(e){}
+  }
+  function init(){
+    safeSwap('iphone');
+    var seg = document.getElementById('deviceSeg');
+    if(seg){
+      seg.addEventListener('click', function(e){
+        var b = e.target.closest && e.target.closest('button[data-mode]');
+        if(!b) return;
+        safeSwap(b.getAttribute('data-mode'));
+      });
+      var btnI = seg.querySelector('.seg-btn[data-mode="iphone"]');
+      var btnP = seg.querySelector('.seg-btn[data-mode="ipad"]');
+      if(btnI) btnI.onclick = function(){ safeSwap('iphone'); };
+      if(btnP) btnP.onclick = function(){ safeSwap('ipad'); };
+    }
+    window.__setUIPreviewMode = safeSwap;
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
+
 </body>
 </html>
